@@ -1,5 +1,8 @@
 ﻿using LightControlApi.Models;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using System.Security.Cryptography.X509Certificates;
+using System.Text.Json.Nodes;
 using static LightControlApi.Models.Data;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -14,8 +17,14 @@ namespace LightControlApi.Controllers
         [HttpGet]
         public IActionResult Get()
         {
-            return new ObjectResult(new Data() { Id = 1});
+            Data data;
+            using (StreamReader sr = new StreamReader("JSON/status.json"))
+            {
+                string json = sr.ReadToEnd();
+                data = JsonConvert.DeserializeObject<Data>(json);
+            }
 
+            return new ObjectResult(new Data { Status = data.Status });
         }
 
         // GET api/<LightController>/5
