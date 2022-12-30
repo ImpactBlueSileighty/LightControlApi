@@ -4,6 +4,10 @@ using Newtonsoft.Json;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json.Nodes;
 using static LightControlApi.Models.Data;
+using System.Text.Json;
+using Microsoft.AspNetCore.Components.RenderTree;
+using Newtonsoft.Json.Linq;
+using Microsoft.AspNetCore.Components.Web;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -27,30 +31,38 @@ namespace LightControlApi.Controllers
             return new ObjectResult(new Data { Status = data.Status });
         }
 
-        // GET api/<LightController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
-        {
-            return "value";
-        }
-
-        // POST api/<LightController>
-        [HttpPost]
-        public void Post([FromBody] string value)
-        {
-
-        }
 
         // PUT api/<LightController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        [HttpPut("{status}")]
+        public IActionResult Put(bool status)
         {
+            bool result = false; 
+            string json;
+            using (StreamReader sr = new StreamReader("JSON/status.json"))
+            {
+
+                json = sr.ReadToEnd();
+                Data data = JsonConvert.DeserializeObject<Data>(json);
+                var jObj = JObject.Parse(json);
+                if (jObj == null)
+                    return StatusCode(404);
+
+                foreach (var item in jObj.Properties())
+                {
+                    item.Value = Convert.ToBoolean(item.Value.ToString().Replace(data.Status.ToString(), result.ToString()).ToLower());
+                }
+
+                result = (bool)jObj;
+            }
+
+            using(StreamWriter sw = new StreamWriter("JSON/status.json"))
+            {
+                sw.Write(result);
+            }
+
+            return Ok();
+
         }
 
-        // DELETE api/<LightController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }
     }
 }
