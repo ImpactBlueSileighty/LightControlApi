@@ -34,24 +34,30 @@ namespace LightControlApi.Controllers
         [HttpPut("{status}")]
         public IActionResult Put(bool status)
         {
-            bool result = false; 
+
+            string result; 
             string json;
+            Data data;
             using (StreamReader sr = new StreamReader("JSON/status.json"))
             {
 
                 json = sr.ReadToEnd();
-                Data data = JsonConvert.DeserializeObject<Data>(json);
-                var jObj = JObject.Parse(json);
-                if (jObj == null)
-                    return StatusCode(404);
+                data = JsonConvert.DeserializeObject<Data>(json);
+                data.Status = status;
 
-                foreach (var item in jObj.Properties())
+                result = JsonConvert.SerializeObject(data);
+
+
+                /*foreach (var item in jObj.Properties())
                 {
                     item.Value = Convert.ToBoolean(item.Value.ToString().Replace(data.Status.ToString(), result.ToString()).ToLower());
-                }
+                }*/
 
-                result = (bool)jObj;
+
             }
+
+
+            
 
             using(StreamWriter sw = new StreamWriter("JSON/status.json"))
             {
